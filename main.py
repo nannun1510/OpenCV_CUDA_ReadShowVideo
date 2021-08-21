@@ -16,7 +16,6 @@ vod = cv.VideoCapture('./img/sea.mp4')
 #         break
 
 
-
 ret, frame = vod.read()
 scale = 0.5
 gpu_frame = cv.cuda_GpuMat()
