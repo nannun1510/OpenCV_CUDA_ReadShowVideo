@@ -4,6 +4,7 @@ import threading
 
 
 frames={}
+scale = 0.8
 
 def readvid(i):
     vod = cv2.VideoCapture("./img/sea.mp4")
@@ -13,10 +14,10 @@ def readvid(i):
             gpu_frame = cv2.cuda_GpuMat()
             gpu_frame.upload(frame)
             img = cv2.cuda.cvtColor(gpu_frame, cv2.COLOR_BGR2BGRA)
+            img = cv2.cuda.resize(img, (int(1280 * scale), int(720 * scale)))
             frames[i] = img.download()
         except:
             pass
-
 
 def showvid():
     while True:
