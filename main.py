@@ -17,22 +17,22 @@ frames={}
 #         break
 
 
-def readvid(vid,i):
-    vod = cv2.VideoCapture(vid)
-    ret, frame = vod.read()
-    scale = 0.5
-    gpu_frame = cv2.cuda_GpuMat()
+def readvid(i):
+    vod = cv2.VideoCapture("./img/sea.mp4")
     while True:
         try:
+            ret, frame = vod.read()
+            gpu_frame = cv2.cuda_GpuMat()
             gpu_frame.upload(frame)
             img = cv2.cuda.cvtColor(gpu_frame, cv2.COLOR_BGR2BGRA)
             frames[i] = img.download()
         except:
             pass
 
-def show():
-    try:
-        while True:
+
+def showvid():
+    while True:
+        try:
             start = time()
             frame = frames[1]
             end = time()
@@ -41,12 +41,13 @@ def show():
             cv2.imshow('ss', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-            #ret, frame = vod.read()
-    except:
-        pass
-
-
+        except:
+            pass
 
 
 if __name__ == '__main__':
-    load = threading.Thread(target=readvid,args=("./img/loading.mp4",1))
+    load = threading.Thread(target=readvid,args=(1,))
+    show = threading.Thread(target=showvid,args=())
+
+    load.start()
+    show.start()
