@@ -1,8 +1,9 @@
-import cv2 as cv
+import cv2
 from time import sleep, time
+import threading
 
 
-vod = cv.VideoCapture('./img/sea.mp4')
+frames={}
 
 # while True:
 #     start = time()
@@ -16,29 +17,36 @@ vod = cv.VideoCapture('./img/sea.mp4')
 #         break
 
 
-ret, frame = vod.read()
-scale = 0.5
-gpu_frame = cv.cuda_GpuMat()
-
-while ret:
-    start = time()
-    gpu_frame.upload(frame)
-
-    resized = cv.cuda.resize(gpu_frame, (int(1280 * scale), int(720 * scale)))
-    resized = resized.download()
-
-    end = time()
-    fps_label = "FPS: %.2f " % (1 / (end - start))
-    cv.putText(resized, fps_label, (0, 45), cv.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    cv.imshow('ss', resized)
-
-
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        break
-
+def readvid(vid,i):
+    vod = cv2.VideoCapture(vid)
     ret, frame = vod.read()
+    scale = 0.5
+    gpu_frame = cv2.cuda_GpuMat()
+    while True:
+        try:
+            gpu_frame.upload(frame)
+            img = cv2.cuda.cvtColor(gpu_frame, cv2.COLOR_BGR2BGRA)
+            frames[i] = img.download()
+        except:
+            pass
 
-vod.release()
-cv.destroyAllWindows()
+def show():
+    try:
+        while True:
+            start = time()
+            frame = frames[1]
+            end = time()
+            fps_label = "FPS: %.2f " % (1 / (end - start))
+            cv2.putText(frame, fps_label, (0, 45), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            cv2.imshow('ss', frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            #ret, frame = vod.read()
+    except:
+        pass
 
-    
+
+
+
+if __name__ == '__main__':
+    load = threading.Thread(target=readvid,args=("./img/loading.mp4",1))
